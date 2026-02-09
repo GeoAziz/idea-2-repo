@@ -1,5 +1,6 @@
 export const defaultConfig = {
   defaults: {
+    language: 'node',
     stack: 'nextjs',
     includeTests: true,
     testFramework: 'jest',

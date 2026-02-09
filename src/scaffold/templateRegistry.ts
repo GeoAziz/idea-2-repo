@@ -116,6 +116,9 @@ dist
 .idea2repo`;
 
     case 'package.json':
+      if (decisions.language && decisions.language !== 'node') {
+        return json({});
+      }
       return json({
         name,
         version: '0.1.0',
@@ -133,6 +136,9 @@ dist
       });
 
     case 'tsconfig.json':
+      if (decisions.language && decisions.language !== 'node') {
+        return json({});
+      }
       return json({
         compilerOptions: {
           target: 'ES2020',
@@ -175,6 +181,11 @@ ${copilotInput}
 ${copilotOutput}
 \`\`\`
 
+## System Diagram
+\`\`\`mermaid
+${decisions.mermaidDiagram ?? 'graph TD\n  A[User] --> B[App]'}
+\`\`\`
+
 ## Summary
 - **App type**: ${normalized.appType}
 - **Domain**: ${normalized.domain}
@@ -215,6 +226,42 @@ Use the Copilot rationale above to guide implementation decisions.`;
 
 ## Tradeoffs
 Copilot CLI recommended the architecture above. Adjust based on team preferences and constraints.`;
+
+    case 'docs/dependencies.md':
+      return `# Dependency Choices
+
+${decisions.dependencyPlan?.length ? '## Suggested Packages' : 'No dependency recommendations available.'}
+
+${decisions.dependencyPlan
+  ?.map((dep: { name: string; reason?: string }) => `- **${dep.name}**${dep.reason ? ` — ${dep.reason}` : ''}`)
+  .join('\n') ?? ''}`;
+
+    case 'requirements.txt':
+      return `fastapi\nuvicorn\n`;
+
+    case 'pyproject.toml':
+      return `[tool.poetry]\nname = "${name}"\nversion = "0.1.0"\ndescription = "${normalized.problem}"\n`;
+
+    case 'src/main.py':
+      return `def main():\n    print("Hello from ${name}")\n\n\nif __name__ == "__main__":\n    main()\n`;
+
+    case 'tests/test_main.py':
+      return `def test_main():\n    assert True\n`;
+
+    case 'go.mod':
+      return `module ${name}\n\ngo 1.22\n`;
+
+    case 'cmd/app/main.go':
+      return `package main\n\nimport "fmt"\n\nfunc main() {\n  fmt.Println("Hello from ${name}")\n}\n`;
+
+    case 'tests/main_test.go':
+      return `package tests\n\nimport "testing"\n\nfunc TestMain(t *testing.T) {\n  if 1 != 1 {\n    t.Fail()\n  }\n}\n`;
+
+    case 'Cargo.toml':
+      return `[package]\nname = "${name}"\nversion = "0.1.0"\nedition = "2021"\n`;
+
+    case 'src/main.rs':
+      return `fn main() {\n    println!("Hello from ${name}");\n}\n`;
 
     case 'docs/onboarding.md':
       return `# Onboarding Guide

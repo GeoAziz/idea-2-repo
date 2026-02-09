@@ -14,21 +14,31 @@ import path from 'path';
 function parseArgs(args: string[]) {
   const outIndex = args.findIndex((arg) => arg === '--out' || arg === '-o');
   const teamMode = args.includes('--team');
+  const langIndex = args.findIndex((arg) => arg === '--lang' || arg === '-l');
+  const language = langIndex >= 0 && args[langIndex + 1] ? args[langIndex + 1] : undefined;
   let outDir: string | undefined;
   if (outIndex >= 0 && args[outIndex + 1]) {
     outDir = args[outIndex + 1];
   }
   const ideaParts =
     outIndex >= 0
-      ? args.filter((_, idx) => idx !== outIndex && idx !== outIndex + 1 && args[idx] !== '--team')
-      : args.filter((arg) => arg !== '--team');
-  return { idea: ideaParts.join(' ').trim(), outDir, teamMode };
+      ? args.filter(
+          (_, idx) =>
+            idx !== outIndex &&
+            idx !== outIndex + 1 &&
+            idx !== langIndex &&
+            idx !== langIndex + 1 &&
+            args[idx] !== '--team'
+        )
+      : args.filter((arg, idx) => arg !== '--team' && idx !== langIndex && idx !== langIndex + 1);
+  return { idea: ideaParts.join(' ').trim(), outDir, teamMode, language };
 }
 
 export async function generate(args: string[]) {
   const config = ConfigManager.load();
-  const { idea, outDir, teamMode } = parseArgs(args);
+  const { idea, outDir, teamMode, language } = parseArgs(args);
   const resolvedTeamMode = teamMode || config.defaults.teamMode;
+  const resolvedLanguage = language ?? config.defaults.language;
 
   if (!idea) {
     logger.error(colors.error('Please provide an idea: idea2repo generate "your awesome app idea"'));
@@ -71,7 +81,8 @@ export async function generate(args: string[]) {
       copilotInput: copilotPrompt,
       copilotOutput: copilotSuggestion,
       targetDir,
-      teamMode: resolvedTeamMode
+      teamMode: resolvedTeamMode,
+      language: resolvedLanguage
     });
     scaffoldSpinner.succeed(colors.success(`Structure ready (${structure.files.length} files)\n`));
     logger.info(renderBox(`🎉 Project Created Successfully!\n\nName: ${name}\nPath: ${structure.outputDir}\nType: ${classification.kind}`, {

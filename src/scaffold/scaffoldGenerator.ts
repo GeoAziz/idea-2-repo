@@ -7,6 +7,7 @@ import { interpretCopilotOutput } from '../copilot/interpretation';
 import { generateCopilotContent } from '../copilot/contentGenerator';
 import { RiskAssessor, RiskAssessment } from '../core/riskAssessment';
 import { logger } from '../utils/logger';
+import { suggest } from '../copilot/copilotClient';
 
 type ScaffoldInput = {
   targetDir: string;
@@ -27,12 +28,16 @@ type ScaffoldInput = {
   copilotOutput: string;
   dryRun?: boolean;
   teamMode?: boolean;
+  language?: string;
 };
 
 export async function generateScaffold(input: ScaffoldInput) {
-  const { targetDir, dryRun, name, idea, normalized, classification, copilotInput, copilotOutput, teamMode } = input;
+  const { targetDir, dryRun, name, idea, normalized, classification, copilotInput, copilotOutput, teamMode, language } =
+    input;
 
   const interpretation = interpretCopilotOutput(copilotOutput);
+  const dependencyPlan = await generateDependencyPlan(idea, classification.kind, language ?? 'node');
+  const mermaidDiagram = await generateArchitectureDiagram(idea, classification.kind, interpretation.framework ?? '');
   const generatedContent = await generateCopilotContent(
     {
       idea,
@@ -61,6 +66,9 @@ export async function generateScaffold(input: ScaffoldInput) {
     stackNotes: interpretation.stackNotes,
     generatedContent,
     teamMode: Boolean(teamMode),
+    language: language ?? 'node',
+    dependencyPlan,
+    mermaidDiagram,
     createdAt: new Date().toISOString()
   };
 
@@ -73,6 +81,7 @@ export async function generateScaffold(input: ScaffoldInput) {
     classification,
     decisions,
     teamMode: Boolean(teamMode),
+    language: language ?? 'node',
     copilotInput,
     copilotOutput
   });
@@ -188,4 +197,41 @@ function appendRiskSummaryToReadme(outputPath: string, assessment: RiskAssessmen
   const riskSection = `\n\n## Security & Risk\n\n**Risk Level**: ${assessment.level.toUpperCase()} (Score: ${assessment.score}/100)\n\n### Key Risk Factors\n${riskFactors || '- None detected'}\n\n### Security Documentation\n${docsList || '- None generated'}\n\nSee the security checklist and compliance requirements in the \`docs/\` folder.\n`;
 
   fs.appendFileSync(readmePath, riskSection);
+}
+
+async function generateDependencyPlan(idea: string, projectType: string, language: string) {
+  if (language !== 'node') return null;
+  const prompt = `Recommend npm packages for this project.
+Idea: ${idea}
+Type: ${projectType}
+
+Provide a bulleted list of packages with a short reason each.`;
+  const response = await suggest(prompt);
+  return parseDependencyPlan(response);
+}
+
+function parseDependencyPlan(response: string) {
+  const lines = response.split('\n');
+  const suggestions = lines
+    .map((line) => line.replace(/^[-*]\s*/, '').trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [pkg, ...rest] = line.split(' - ');
+      return {
+        name: pkg.trim(),
+        reason: rest.join(' - ').trim()
+      };
+    });
+  return suggestions.slice(0, 10);
+}
+
+async function generateArchitectureDiagram(idea: string, projectType: string, framework: string) {
+  const prompt = `Create a Mermaid diagram for this project:
+Idea: ${idea}
+Type: ${projectType}
+Framework: ${framework}
+
+Return only Mermaid syntax.`;
+  const response = await suggest(prompt);
+  return response.trim();
 }
