@@ -4,24 +4,19 @@ This document explains how GitHub Copilot CLI is integrated into `idea2repo` to 
 
 ## Core Integration Points
 
-### 1. Copilot Client (`src/copilot/copilotClient.ts`)
+### 1. Reasoning Backend (`src/reasoning`)
 
-The heart of the integration uses two GitHub Copilot CLI commands:
+Copilot is treated as a **pluggable reasoning backend**, not a hard-coded command. The default backend uses Copilot CLI, but you can swap to offline reasoning via `REASONING_BACKEND=offline`.
 
 #### `suggest(prompt: string)`
 
-Calls `gh copilot suggest` with a structured prompt:
+Calls the Copilot CLI command with a structured prompt:
 
 ```typescript
 export async function suggest(prompt: string): Promise<string> {
-  try {
-    const cmd = `gh copilot suggest "${prompt.replace(/"/g, '\\"')}"`;
-    const result = execSync(cmd, { encoding: 'utf8' });
-    return result.trim();
-  } catch (error: any) {
-    logger.warn('GitHub Copilot CLI not available. Using offline suggestion.');
-    return fallbackSuggest(prompt);
-  }
+  const cmd = `${process.env.COPILOT_CLI_CMD ?? 'gh copilot'} suggest "${prompt.replace(/"/g, '\\"')}"`;
+  const result = execSync(cmd, { encoding: 'utf8' });
+  return result.trim();
 }
 ```
 
@@ -33,18 +28,13 @@ export async function suggest(prompt: string): Promise<string> {
 
 #### `explain(prompt: string)`
 
-Calls `gh copilot explain` for deeper reasoning:
+Calls Copilot CLI for deeper reasoning:
 
 ```typescript
 export async function explain(prompt: string): Promise<string> {
-  try {
-    const cmd = `gh copilot explain "${prompt.replace(/"/g, '\\"')}"`;
-    const result = execSync(cmd, { encoding: 'utf8' });
-    return result.trim();
-  } catch (error: any) {
-    logger.warn('GitHub Copilot CLI not available. Using offline explanation.');
-    return fallbackExplain(prompt);
-  }
+  const cmd = `${process.env.COPILOT_CLI_CMD ?? 'gh copilot'} explain "${prompt.replace(/"/g, '\\"')}"`;
+  const result = execSync(cmd, { encoding: 'utf8' });
+  return result.trim();
 }
 ```
 
@@ -167,7 +157,7 @@ To test locally:
 
 ```bash
 # Ensure gh CLI and copilot extension are installed
-gh copilot --version
+${COPILOT_CLI_CMD:-gh copilot} --version
 
 # Run the tool with debug logging
 DEBUG=* npm run start -- generate "Your idea here"

@@ -1,7 +1,7 @@
 import { prompt } from 'prompts';
 import { normalize } from '../core/ideaNormalizer';
 import { classify } from '../core/projectClassifier';
-import { suggest } from '../copilot/copilotClient';
+import { suggest } from '../reasoning';
 import { logger } from '../utils/logger';
 import { generateScaffold } from '../scaffold/scaffoldGenerator';
 import { slugify } from '../utils/slug';
