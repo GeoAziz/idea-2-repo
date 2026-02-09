@@ -1,14 +1,15 @@
 # idea2repo: From Idea to Repository in Seconds
 
-**Transform a plain-English product idea into a fully structured, ready-to-start software repository—powered by GitHub Copilot CLI.**
+**Transform a plain-English product idea into a fully structured, ready-to-start software repository—powered by intelligent AI reasoning.**
 
-Instead of staring at a blank folder wondering "Where do I start?", describe your idea and let `idea2repo` use GitHub Copilot CLI as a co-founder to generate:
+Instead of staring at a blank folder wondering "Where do I start?", describe your idea and let `idea2repo` generate:
 
 - ✨ A sensible, opinionated project structure
 - 📝 A clear, realistic README
 - 🏗️ Architecture and roadmap documentation
-- ✅ Actionable MVP TODOs
+- ✅ Actionable MVP TODOs  
 - 🤔 Explainable architectural decisions
+- **🚀 Works online OR offline** —with optional GitHub Copilot CLI for enhanced reasoning
 
 ## The Problem
 
@@ -30,17 +31,20 @@ idea2repo "AI-powered expense tracker for freelancers"
 That's it. The CLI:
 
 1. **Understands** your idea (normalizes intent, detects domain and risk)
-2. **Reasons** with GitHub Copilot CLI (proposing architecture, tradeoffs, and justification)
+2. **Reasons** intelligently:
+   - With GitHub Copilot CLI: Real-time AI-powered architectural reasoning
+   - Without: Smart rule-based suggestions (always available)
 3. **Generates** a complete repo scaffold (files, docs, tasks)
 
-All decisions are **explainable**—you can ask the CLI "why did you choose PostgreSQL?" and it tells you.
+All decisions are **explainable**—ask the CLI "why did you choose PostgreSQL?" and it tells you.
 
 ## Core Philosophy
 
 - **Ideas first, files second**: Start with intention, not blank templates
 - **Opinionated but editable**: Strong defaults that you can remix
 - **Explainable decisions**: Every architectural choice is traceable and justified
-- **Copilot CLI does the thinking**: The tool delegates reasoning to the AI, not random logic
+- **Works everywhere**: Intelligent offline mode + optional AI enhancement with Copilot CLI
+- **Smart reasoning**: AI-powered when available, always sensible as fallback
 
 ## Usage
 
@@ -96,21 +100,26 @@ my-project/
 - **TODO.md**: Specific, actionable tasks for implementation
 - **package.json**: Dependencies inferred from stack choice
 
-## How GitHub Copilot CLI Powers This
+## Dual-Backend Reasoning
 
-The entire reasoning engine delegates to `gh copilot suggest` and `gh copilot explain`:
+The tool uses a **smart fallback system**:
 
-```typescript
-// In src/copilot/copilotClient.ts
-const prompt = `Design a clean, opinionated repository structure for this marketplace app...`;
-const suggestion = await suggest(prompt);  // Calls "gh copilot suggest"
+### With GitHub Copilot CLI (Enhanced Mode)
+```bash
+copilot -p "Design a clean, opinionated repository structure for this marketplace..."
 ```
+- ✅ Real AI-powered architectural reasoning
+- ✅ Context-aware decisions for your specific idea
+- ✅ Capture why Copilot suggested each choice
+- ✅ Fast: 5-second timeout ensures responsiveness
 
-This means:
-- ✅ Real architectural reasoning, not template lookup
-- ✅ Context-aware decisions based on your specific idea
-- ✅ Explainability: we capture why Copilot suggested each choice
-- ✅ You can ask follow-up questions to the same session
+### Without Copilot CLI (Always-On Mode)
+- ✅ Intelligent rule-based suggestions (no network needed)
+- ✅ Domain detection: AI/ML, Web, Mobile, Backend
+- ✅ Sensible defaults that work for most projects
+- ✅ Zero dependencies beyond Node.js
+
+**The tool automatically upgrades to AI when Copilot CLI is available, but always works offline.**
 
 ## Installation & Getting Started
 
@@ -118,19 +127,32 @@ This means:
 
 - Node.js 16+ 
 - npm or yarn
-- **GitHub Copilot CLI** installed (`gh` CLI with `gh copilot` extension)
+- (Optional) **GitHub Copilot CLI** for enhanced AI reasoning:
+  - Install: https://github.com/github/copilot-cli
+  - Authenticate: `copilot -i "/login"` (one-time setup)
+  - The tool works perfectly without it!
 
-### Install
+### Install & Quick Start
+
+**Option 1: Run from source (recommended for development)**
 
 ```bash
-npm install -g idea2repo
+npm install
+npm run dev -- generate "Your app idea here"
 ```
 
-Or run directly:
+**Option 2: Build and run with Node**
 
 ```bash
+npm install
 npm run build
-npm run start -- generate "your app idea here"
+node dist/bin/idea2repo.js generate "Your app idea here"
+```
+
+**Option 3: Interactive setup**
+
+```bash
+npm run dev -- init  # or npm run build && node dist/bin/idea2repo.js init
 ```
 
 ## Development
@@ -168,10 +190,13 @@ npm run dev -- generate "Your idea here"
 
 - **src/cli/**: Command routing and help
 - **src/core/**: Idea normalization, project classification, decision model
-- **src/copilot/**: GitHub Copilot CLI integration (suggest/explain)
+- **src/reasoning/**: Pluggable backend system (Copilot CLI + offline mode)
+  - `backends/copilotCliBackend.ts`: Standalone Copilot CLI integration
+  - `backends/offlineBackend.ts`: Smart rule-based fallback
 - **src/scaffold/**: File generation and project structure building
-- **src/commands/**: generate, init, explain subcommands
+- **src/commands/**: generate, init, explain, chat subcommands
 - **tests/**: Jest test suites
+- **docs/**: Architecture, features, examples, and user guides
 
 ## Test Coverage
 

@@ -2,47 +2,76 @@
 
 This document explains how GitHub Copilot CLI is integrated into `idea2repo` to provide intelligent architectural reasoning and code generation.
 
+## Setup
+
+idea2repo works with or without GitHub Copilot CLI:
+
+- **With Copilot CLI** (enhanced): Install standalone from https://github.com/github/copilot-cli, then authenticate: `copilot -i "/login"`
+- **Without Copilot CLI** (always works): Uses intelligent offline backend with domain-aware suggestions
+
 ## Core Integration Points
 
 ### 1. Reasoning Backend (`src/reasoning`)
 
-Copilot is treated as a **pluggable reasoning backend**, not a hard-coded command. The default backend uses Copilot CLI, but you can swap to offline reasoning via `REASONING_BACKEND=offline`.
+Copilot is treated as a **pluggable reasoning backend**, not a hard-coded dependency. The system includes:
 
-#### `suggest(prompt: string)`
+#### Copilot CLI Backend (`src/reasoning/backends/copilotCliBackend.ts`)
 
-Calls the Copilot CLI command with a structured prompt:
+Uses the standalone Copilot CLI command with structured prompts:
 
 ```typescript
-export async function suggest(prompt: string): Promise<string> {
-  const cmd = `${process.env.COPILOT_CLI_CMD ?? 'gh copilot'} suggest "${prompt.replace(/"/g, '\\"')}"`;
-  const result = execSync(cmd, { encoding: 'utf8' });
-  return result.trim();
+// Uses standalone 'copilot' command (not deprecated 'gh copilot' extension)
+const cmd = `copilot -p "${escapePrompt(prompt)}" --allow-all`;
+const result = execSync(cmd, { 
+  encoding: 'utf8', 
+  timeout: 5000  // Fast timeout - fail over to offline if slow
+});
+```
+
+**Key improvements:**
+- Uses standalone `copilot` CLI (not `gh copilot` extension)
+- Uses `-p` flag for structured prompt input
+- Includes `--allow-all` for non-interactive mode
+- 5-second timeout for responsive fallback to offline backend
+
+#### Offline Backend (`src/reasoning/backends/offlineBackend.ts`)
+
+Provides intelligent rule-based suggestions that work without any API calls:
+
+```typescript
+// Detects: AI/ML, Web, Mobile, Backend projects
+// Returns domain-specific architecture suggestions
+if (prompt.includes('ai') || prompt.includes('ml')) {
+  return `Suggested AI/ML architecture:
+- src/models/: ML models and inference
+- src/features/: Feature engineering
+- src/services/: API and business logic
+- requirements.txt: Python dependencies`;
+}
+// Similar patterns for Web, Mobile, Backend
+```
+
+### 2. Fallback Strategy (`src/reasoning/index.ts`)
+
+The reasoning system automatically attempts Copilot CLI first, then falls back:
+
+```typescript
+async function withFallback<T>(fn, prompt) {
+  const backend = selectedBackend();
+  try {
+    return await fn(backend);  // Try Copilot CLI first
+  } catch (error) {
+    logger.warn(`${backend.name} backend failed, falling back to offline.`);
+    return fn(offlineBackend);  // Always available fallback
+  }
 }
 ```
 
-**Used for:**
-- Generating optimal repository structure recommendations
-- Suggesting tech stack choices
-- Proposing file organization patterns
-- Identifying architectural patterns for the domain
-
-#### `explain(prompt: string)`
-
-Calls Copilot CLI for deeper reasoning:
-
-```typescript
-export async function explain(prompt: string): Promise<string> {
-  const cmd = `${process.env.COPILOT_CLI_CMD ?? 'gh copilot'} explain "${prompt.replace(/"/g, '\\"')}"`;
-  const result = execSync(cmd, { encoding: 'utf8' });
-  return result.trim();
-}
-```
-
-**Used for:**
-- Explaining architectural decisions
-- Justifying tech stack choices
-- Providing rationale for project structure
-- Answering "why" questions about generated content
+**Benefits:**
+- ✅ Works offline with intelligent suggestions
+- ✅ Upgrades to AI when Copilot CLI is available
+- ✅ Fast failover (5-second timeout)
+- ✅ No blocking on network latency
 
 ### 2. The Generate Workflow (`src/commands/generate.ts`)
 

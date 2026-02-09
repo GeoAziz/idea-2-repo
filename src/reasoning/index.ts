@@ -14,9 +14,11 @@ async function withFallback<T>(fn: (backend: ReasoningBackend) => Promise<T>, pr
   try {
     return await fn(backend);
   } catch (error: any) {
-    logger.warn(
-      `${backend.name} backend failed, falling back to offline reasoning.`
-    );
+    // Silently fall back to offline—this is expected behavior
+    // Only log if verbose mode is enabled
+    if (process.env.VERBOSE_REASONING) {
+      logger.warn(`${backend.name} backend failed, using offline reasoning.`);
+    }
     return fn(offlineBackend);
   }
 }
