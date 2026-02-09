@@ -4,6 +4,9 @@ import { CodeScanner } from '../scanner/codeScanner';
 import { planMigration } from '../migration/migrationPlanner';
 import { generateMigrationStructure } from '../migration/structureGenerator';
 import { logger } from '../utils/logger';
+import { renderTable } from '../ui/table';
+import { colors } from '../ui/colors';
+import { startSpinner } from '../ui/spinner';
 
 function parseArgs(args: string[]) {
   const restructure = args.includes('--restructure');
@@ -18,25 +21,31 @@ export async function migrate(args: string[]) {
   const projectPath = path.resolve(targetPath);
 
   if (!fs.existsSync(projectPath)) {
-    logger.error(`Path does not exist: ${projectPath}`);
+    logger.error(colors.error(`Path does not exist: ${projectPath}`));
     return { ok: false, error: 'Missing project path' };
   }
 
-  logger.info(`\n🧭 Scanning project: ${projectPath}\n`);
+  logger.info(colors.info(`\n🧭 Scanning project: ${projectPath}\n`));
   const scanner = new CodeScanner(projectPath);
   const scan = scanner.scan();
 
-  logger.info(`Detected frameworks: ${scan.frameworks.join(', ') || 'Unknown'}`);
-  logger.info(`Dependencies found: ${scan.dependencies.length}`);
-  logger.info(`Config files: ${scan.configFiles.join(', ') || 'None'}\n`);
+  const table = renderTable(
+    ['Check', 'Status'],
+    [
+      ['Frameworks', scan.frameworks.join(', ') || 'Unknown'],
+      ['Dependencies', scan.dependencies.length],
+      ['Config files', scan.configFiles.join(', ') || 'None']
+    ]
+  );
+  logger.info(table);
 
-  logger.info('• Generating migration plan with Copilot...');
+  const planSpinner = startSpinner('Generating migration plan with Copilot...');
   const plan = await planMigration({
     structure: scan.structure,
     dependencies: scan.dependencies,
     frameworks: scan.frameworks
   });
-  logger.info('  ✓ Migration plan ready\n');
+  planSpinner.succeed(colors.success('Migration plan ready\n'));
 
   logger.info(plan.response);
 

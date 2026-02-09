@@ -1,0 +1,38 @@
+{
+  "id": "saas-dashboard",
+  "name": "SaaS Dashboard",
+  "emoji": "📱",
+  "description": "A full-featured admin dashboard with authentication",
+  "stack": {
+    "frontend": "Next.js",
+    "backend": "Next.js API Routes",
+    "database": "PostgreSQL",
+    "orm": "Prisma",
+    "styling": "Tailwind CSS",
+    "auth": "NextAuth.js"
+  },
+  "riskLevel": "medium",
+  "idea": "A modern SaaS admin dashboard with user authentication, role-based access control, and data visualization",
+  "features": [
+    "User authentication (email/password, OAuth)",
+    "Role-based permissions",
+    "Dashboard with charts and metrics",
+    "User management",
+    "Settings and profile pages"
+  ],
+  "customizations": [
+    {
+      "key": "includeStripe",
+      "question": "Include Stripe for subscriptions?",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "key": "deployTarget",
+      "question": "Deployment target?",
+      "type": "choice",
+      "options": ["Vercel", "Netlify", "AWS", "Self-hosted"],
+      "default": "Vercel"
+    }
+  ]
+}

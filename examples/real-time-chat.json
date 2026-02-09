@@ -1,0 +1,26 @@
+{
+  "id": "real-time-chat",
+  "name": "Real-time Chat App",
+  "emoji": "💬",
+  "description": "WebSocket-based messaging platform",
+  "stack": {
+    "frontend": "Next.js",
+    "backend": "Socket.io",
+    "database": "Redis"
+  },
+  "riskLevel": "medium",
+  "idea": "A real-time chat application with channels, presence, and notifications",
+  "features": [
+    "Real-time messaging",
+    "Presence indicators",
+    "Push notifications"
+  ],
+  "customizations": [
+    {
+      "key": "includeFileSharing",
+      "question": "Include file sharing?",
+      "type": "boolean",
+      "default": true
+    }
+  ]
+}

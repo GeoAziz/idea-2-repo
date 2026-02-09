@@ -24,6 +24,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@types/figlet": "^1.5.8",
     "@types/jest": "^29.5.0",
     "@types/inquirer": "^8.2.5",
     "@types/node": "^18.16.0",
@@ -38,9 +39,13 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
+    "boxen": "^5.1.2",
     "chalk": "4.1.2",
+    "cli-table3": "^0.6.3",
     "commander": "^10.0.0",
+    "figlet": "^1.6.0",
     "fs-extra": "^11.1.0",
+    "gradient-string": "^2.0.2",
     "inquirer": "^8.2.5",
     "ora": "^5.4.1",
     "prompts": "^2.4.2",

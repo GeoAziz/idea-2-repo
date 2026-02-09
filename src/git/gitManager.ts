@@ -12,6 +12,11 @@ export interface GitInitOptions {
   autoPush?: boolean;
   remoteName?: string;
   remoteUrl?: string;
+  preferences?: {
+    autoGitInit?: boolean;
+    autoGitCommit?: boolean;
+    skipConfirmations?: boolean;
+  };
 }
 
 export class GitManager {
@@ -136,7 +141,7 @@ Project structure:
   }
 
   static async interactiveSetup(options: GitInitOptions): Promise<void> {
-    const { projectPath, projectName } = options;
+    const { projectPath, projectName, preferences } = options;
     const manager = new GitManager(projectPath);
 
     const gitInstalled = await GitManager.isGitInstalled();
@@ -151,14 +156,18 @@ Project structure:
       return;
     }
 
-    const { setupGit } = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'setupGit',
-        message: 'Initialize git repository?',
-        default: true
-      }
-    ]);
+    const setupGit = preferences?.skipConfirmations
+      ? preferences.autoGitInit ?? true
+      : (
+          await inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'setupGit',
+              message: 'Initialize git repository?',
+              default: preferences?.autoGitInit ?? true
+            }
+          ])
+        ).setupGit;
 
     if (!setupGit) {
       return;
@@ -167,27 +176,35 @@ Project structure:
     await manager.init();
     await manager.createGitignore();
 
-    const { createCommit } = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'createCommit',
-        message: 'Create initial commit?',
-        default: true
-      }
-    ]);
+    const createCommit = preferences?.skipConfirmations
+      ? preferences.autoGitCommit ?? true
+      : (
+          await inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'createCommit',
+              message: 'Create initial commit?',
+              default: preferences?.autoGitCommit ?? true
+            }
+          ])
+        ).createCommit;
 
     if (createCommit) {
       await manager.createInitialCommit(projectName);
     }
 
-    const { setupRemote } = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'setupRemote',
-        message: 'Add GitHub remote and push?',
-        default: false
-      }
-    ]);
+    const setupRemote = preferences?.skipConfirmations
+      ? Boolean(options.remoteUrl)
+      : (
+          await inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'setupRemote',
+              message: 'Add GitHub remote and push?',
+              default: false
+            }
+          ])
+        ).setupRemote;
 
     if (setupRemote) {
       const { remoteUrl } = await inquirer.prompt([

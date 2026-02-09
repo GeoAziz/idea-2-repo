@@ -1,0 +1,36 @@
+{
+  "id": "ecommerce-marketplace",
+  "name": "E-commerce Marketplace",
+  "emoji": "🛒",
+  "description": "Multi-vendor marketplace with payments",
+  "stack": {
+    "frontend": "React",
+    "backend": "Express",
+    "database": "MongoDB",
+    "payments": "Stripe"
+  },
+  "riskLevel": "high",
+  "idea": "A multi-vendor marketplace where sellers list products and customers can purchase with payments and reviews",
+  "features": [
+    "Vendor onboarding",
+    "Product listings",
+    "Checkout and payments",
+    "Order tracking",
+    "Reviews and ratings"
+  ],
+  "customizations": [
+    {
+      "key": "paymentProvider",
+      "question": "Payment provider?",
+      "type": "choice",
+      "options": ["Stripe", "PayPal"],
+      "default": "Stripe"
+    },
+    {
+      "key": "includeAdminPanel",
+      "question": "Include admin panel?",
+      "type": "boolean",
+      "default": true
+    }
+  ]
+}
