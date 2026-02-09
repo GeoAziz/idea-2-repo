@@ -1,0 +1,16 @@
+
+> idea2repo@0.1.0 dev
+> ts-node bin/idea2repo.ts generate -- AI habit tracker
+
+  _     _            ____                       
+ (_) __| | ___  __ _|___ \ _ __ ___ _ __   ___  
+ | |/ _` |/ _ \/ _` | __) | '__/ _ \ '_ \ / _ \ 
+ | | (_| |  __/ (_| |/ __/| | |  __/ |_) | (_) |
+ |_|\__,_|\___|\__,_|_____|_|  \___| .__/ \___/ 
+                                   |_|          
+Transform ideas into repositories with AI 🚀
+
+Fatal: ⨯ Unable to compile TypeScript:
+src/reasoning/backends/copilotCliBackend.ts(25,14): error TS2339: Property 'debug' does not exist on type '{ info(...args: any[]): void; error(...args: any[]): void; warn(...args: any[]): void; success(...args: any[]): void; }'.
+src/reasoning/backends/copilotCliBackend.ts(39,14): error TS2339: Property 'debug' does not exist on type '{ info(...args: any[]): void; error(...args: any[]): void; warn(...args: any[]): void; success(...args: any[]): void; }'.
+
