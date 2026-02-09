@@ -1,7 +1,7 @@
 {
   "name": "idea2repo",
   "version": "0.1.0",
-  "description": "CLI to generate repository structure and explain design choices (stubbed for local runs).",
+  "description": "CLI to generate repository structure and explain design choices using GitHub Copilot CLI.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
