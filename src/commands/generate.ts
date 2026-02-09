@@ -1,6 +1,6 @@
 import { normalize } from '../core/ideaNormalizer';
 import { classify } from '../core/projectClassifier';
-import { suggest } from '../reasoning';
+import { suggest } from '../copilot/copilotClient';
 import { generateScaffold } from '../scaffold/scaffoldGenerator';
 import { logger } from '../utils/logger';
 import { slugify } from '../utils/slug';

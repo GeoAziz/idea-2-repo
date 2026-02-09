@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { DecisionModel } from '../core/decisionModel';
-import { explain as copilotExplain } from '../reasoning';
+import { explain as copilotExplain } from '../copilot/copilotClient';
 import { build } from '../explainability/explanationBuilder';
 import { logger } from '../utils/logger';
 

@@ -1,4 +1,4 @@
-import { suggest } from '../reasoning';
+import { suggest } from './copilotClient';
 
 type ContentInput = {
   idea: string;
