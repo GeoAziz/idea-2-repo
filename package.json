@@ -1,0 +1,57 @@
+{
+  "name": "idea2repo",
+  "version": "0.1.0",
+  "description": "CLI to generate repository structure and explain design choices (stubbed for local runs).",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "idea2repo": "dist/bin/idea2repo.js"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "start": "node dist/bin/idea2repo.js",
+    "dev": "ts-node bin/idea2repo.ts",
+    "test": "jest --coverage",
+    "lint": "eslint . --ext .ts",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "cli",
+    "copilot",
+    "scaffold",
+    "ideas"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^18.16.0",
+    "@types/prompts": "^2.4.5",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.9.0",
+    "jest": "^29.5.0",
+    "prettier": "^2.8.8",
+    "rimraf": "^5.0.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "chalk": "^5.0.0",
+    "commander": "^10.0.0",
+    "fs-extra": "^11.1.0",
+    "prompts": "^2.4.2"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    }
+  }
+}
