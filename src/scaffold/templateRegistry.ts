@@ -72,7 +72,10 @@ export function contentFor(path: string, context: TemplateContext) {
   if (override) return override;
 
   switch (path) {
-    case 'README.md':
+    case 'README.md': {
+      const teamSection = decisions.teamMode
+        ? `\n## Team Resources\n- \`docs/onboarding.md\`: New developer onboarding guide\n- \`docs/contribution-guide.md\`: Contribution workflow and standards\n- \`docs/ARCHITECTURE_DECISION_RECORD.md\`: Architecture decisions log\n- \`docs/team-setup.md\`: Team environment and coordination notes\n`
+        : '';
       return `# ${name}
 
 ${normalized.problem}
@@ -100,9 +103,11 @@ npm run start
 - \`docs/roadmap.md\`: Phased plan to build the MVP
 - \`docs/decisions.md\`: Decision log and tradeoffs
 - \`TODO.md\`: Actionable tasks to start building
+${teamSection}
 
 ## Notes
 This scaffold is opinionated and intended to be edited. Use it as a starting point.`;
+    }
 
     case '.gitignore':
       return `node_modules
@@ -111,6 +116,9 @@ dist
 .idea2repo`;
 
     case 'package.json':
+      if (decisions.language && decisions.language !== 'node') {
+        return json({});
+      }
       return json({
         name,
         version: '0.1.0',
@@ -128,6 +136,9 @@ dist
       });
 
     case 'tsconfig.json':
+      if (decisions.language && decisions.language !== 'node') {
+        return json({});
+      }
       return json({
         compilerOptions: {
           target: 'ES2020',
@@ -170,6 +181,11 @@ ${copilotInput}
 ${copilotOutput}
 \`\`\`
 
+## System Diagram
+\`\`\`mermaid
+${decisions.mermaidDiagram ?? 'graph TD\n  A[User] --> B[App]'}
+\`\`\`
+
 ## Summary
 - **App type**: ${normalized.appType}
 - **Domain**: ${normalized.domain}
@@ -210,6 +226,130 @@ Use the Copilot rationale above to guide implementation decisions.`;
 
 ## Tradeoffs
 Copilot CLI recommended the architecture above. Adjust based on team preferences and constraints.`;
+
+    case 'docs/dependencies.md':
+      return `# Dependency Choices
+
+${decisions.dependencyPlan?.length ? '## Suggested Packages' : 'No dependency recommendations available.'}
+
+${decisions.dependencyPlan
+  ?.map((dep: { name: string; reason?: string }) => `- **${dep.name}**${dep.reason ? ` — ${dep.reason}` : ''}`)
+  .join('\n') ?? ''}`;
+
+    case 'requirements.txt':
+      return `fastapi\nuvicorn\n`;
+
+    case 'pyproject.toml':
+      return `[tool.poetry]\nname = "${name}"\nversion = "0.1.0"\ndescription = "${normalized.problem}"\n`;
+
+    case 'src/main.py':
+      return `def main():\n    print("Hello from ${name}")\n\n\nif __name__ == "__main__":\n    main()\n`;
+
+    case 'tests/test_main.py':
+      return `def test_main():\n    assert True\n`;
+
+    case 'go.mod':
+      return `module ${name}\n\ngo 1.22\n`;
+
+    case 'cmd/app/main.go':
+      return `package main\n\nimport "fmt"\n\nfunc main() {\n  fmt.Println("Hello from ${name}")\n}\n`;
+
+    case 'tests/main_test.go':
+      return `package tests\n\nimport "testing"\n\nfunc TestMain(t *testing.T) {\n  if 1 != 1 {\n    t.Fail()\n  }\n}\n`;
+
+    case 'Cargo.toml':
+      return `[package]\nname = "${name}"\nversion = "0.1.0"\nedition = "2021"\n`;
+
+    case 'src/main.rs':
+      return `fn main() {\n    println!("Hello from ${name}");\n}\n`;
+
+    case 'docs/onboarding.md':
+      return `# Onboarding Guide
+
+## Welcome
+This project is focused on ${normalized.problem}. You're joining to help ship a ${normalized.appType} experience.
+
+## Getting Started (15 minutes)
+1. Install Node.js 18+
+2. Clone the repository
+3. Run \`npm install\`
+4. Copy \`.env.example\` to \`.env\` (if applicable)
+5. Run \`npm run dev\`
+6. Visit the local app or API endpoint
+
+## Project Structure
+- \`/src\` - Application code
+- \`/docs\` - Project documentation
+- \`/tests\` - Test suite
+
+## Your First Task
+Pick a small improvement in \`TODO.md\` and implement it with tests.`;
+
+    case 'docs/contribution-guide.md':
+      return `# Contribution Guide
+
+## Branching Strategy
+- \`feature/\`: New features
+- \`fix/\`: Bug fixes
+- \`docs/\`: Documentation updates
+
+## Commit Messages
+Use conventional commits (e.g., \`feat:\`, \`fix:\`, \`docs:\`).
+
+## Before Submitting a PR
+- [ ] Run \`npm test\`
+- [ ] Run \`npm run lint\`
+- [ ] Update documentation if needed
+
+## Code Review
+Expect at least one reviewer. Share context and screenshots if UI changes are involved.`;
+
+    case 'docs/ARCHITECTURE_DECISION_RECORD.md':
+      return `# Architecture Decision Records
+
+## ADR-001: Initial Stack Selection
+**Date**: ${new Date().toISOString().split('T')[0]}
+**Status**: Accepted
+
+**Context**:
+We needed a baseline stack for the ${normalized.appType} project in the ${normalized.domain} domain.
+
+**Decision**:
+Use ${decisions.framework ?? 'a framework to be selected'} with ${decisions.database ?? 'a database to be selected'}.
+
+**Reasoning**:
+- Matches complexity: ${classification.complexity}
+- Aligns with Copilot architecture guidance
+- Supports iterative MVP development
+
+**Alternatives Considered**:
+- Revisit other frameworks if requirements change
+
+**Consequences**:
+- Team will align tooling around the chosen stack.`;
+
+    case 'docs/team-setup.md':
+      return `# Team Setup
+
+## Ownership
+- Tech Lead: TBD
+- Product/Design: TBD
+- QA/Testing: TBD
+
+## Environment
+- Node.js 18+
+- Local environment variables stored in \`.env\`
+- Shared secrets stored in the team vault
+
+## Communication
+- Daily updates in the team channel
+- Weekly planning meeting
+- Incident escalation in the on-call channel
+
+## Shared Resources
+- Staging URL: TBD
+- Analytics dashboard: TBD
+- CI/CD pipeline: TBD`;
 
     case 'tests/main.test.ts':
       return `test('project scaffold', () => {\n  expect('idea2repo').toBeDefined();\n});`;
