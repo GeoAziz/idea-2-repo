@@ -12,7 +12,10 @@ function parseArgs(args: string[]) {
   if (outIndex >= 0 && args[outIndex + 1]) {
     outDir = args[outIndex + 1];
   }
-  const ideaParts = args.filter((_, idx) => idx !== outIndex && idx !== outIndex + 1);
+  const ideaParts =
+    outIndex >= 0
+      ? args.filter((_, idx) => idx !== outIndex && idx !== outIndex + 1)
+      : [...args];
   return { idea: ideaParts.join(' ').trim(), outDir };
 }
 
