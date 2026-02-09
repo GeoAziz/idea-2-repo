@@ -38,6 +38,7 @@ export async function generateScaffold(input: ScaffoldInput) {
   const interpretation = interpretCopilotOutput(copilotOutput);
   const dependencyPlan = await generateDependencyPlan(idea, classification.kind, language ?? 'node');
   const mermaidDiagram = await generateArchitectureDiagram(idea, classification.kind, interpretation.framework ?? '');
+  const riskAssessment = await RiskAssessor.assessRisk(idea, copilotOutput);
   const generatedContent = await generateCopilotContent(
     {
       idea,
@@ -69,11 +70,9 @@ export async function generateScaffold(input: ScaffoldInput) {
     language: language ?? 'node',
     dependencyPlan,
     mermaidDiagram,
+    riskAssessment,
     createdAt: new Date().toISOString()
   };
-
-  const riskAssessment = await RiskAssessor.assessRisk(idea, copilotOutput);
-  decisions.riskAssessment = riskAssessment;
 
   const structure = buildStructure({
     idea,
