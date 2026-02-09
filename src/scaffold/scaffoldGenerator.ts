@@ -3,6 +3,7 @@ import fs from 'fs';
 import { buildStructure } from './structureBuilder';
 import { contentFor } from './templateRegistry';
 import { write } from './fileWriter';
+import { interpretCopilotOutput } from '../copilot/interpretation';
 
 type ScaffoldInput = {
   targetDir: string;
@@ -27,14 +28,7 @@ type ScaffoldInput = {
 export async function generateScaffold(input: ScaffoldInput) {
   const { targetDir, dryRun, name, idea, normalized, classification, copilotInput, copilotOutput } = input;
 
-  const structure = buildStructure({
-    idea,
-    normalized,
-    classification,
-    copilotInput,
-    copilotOutput
-  });
-
+  const interpretation = interpretCopilotOutput(copilotOutput);
   const decisions = {
     name,
     idea,
@@ -42,8 +36,20 @@ export async function generateScaffold(input: ScaffoldInput) {
     classification,
     copilotInput,
     copilotOutput,
+    framework: interpretation.framework,
+    database: interpretation.database,
+    stackNotes: interpretation.stackNotes,
     createdAt: new Date().toISOString()
   };
+
+  const structure = buildStructure({
+    idea,
+    normalized,
+    classification,
+    decisions,
+    copilotInput,
+    copilotOutput
+  });
 
   const context = {
     name,
