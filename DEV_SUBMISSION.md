@@ -71,6 +71,20 @@ idea2repo/
 
 ## Demo
 
+### Video Walkthrough (TBD)
+
+> Add a short screen capture (60–120s) showing:
+> 1) `idea2repo examples`
+> 2) `idea2repo use 3`
+> 3) `idea2repo generate -- "AI habit tracker"`
+> 4) A quick scan of the generated README/docs
+
+### Screenshots
+
+- CLI banner + examples table: `Demo/CLI-Generate-Output.png`
+- Generated README preview: `Demo/README.png`
+- Architecture diagram preview: `Demo/Architecture.png`
+
 ### Try it yourself
 
 **Repository**: [github.com/GeoAziz/idea-2-repo](https://github.com/GeoAziz/idea-2-repo)
@@ -165,29 +179,40 @@ export async function explain(prompt: string): Promise<string> {
 
 ### Real Development Impact
 
-**1. Understanding Project Requirements**
+**1. Designing the architecture flow**
 
+Prompt that consistently worked well:
 ```bash
-$ gh copilot explain "What makes a good scaffold for marketplace projects?"
+gh copilot suggest "Design a clean, opinionated repository structure for a web app. Include reasoning and a minimal MVP layout."
 ```
+This shaped the scaffold generation pipeline and the explainable decisions we store for each project.
 
-This question informed my core logic for project classification and shaped which architectural decisions matter most.
+**2. Dependency recommendations**
 
-**2. Code Generation for Complex Patterns**
-
+Prompt used for Node.js projects:
 ```bash
-$ gh copilot suggest "Generate TypeScript interfaces for a decision model in a CLI tool"
+gh copilot suggest "Recommend npm packages for this project. Provide a short reason for each recommendation."
 ```
+This helped build a dependency plan that becomes part of the generated docs.
 
-This accelerated building the decision tracking system and ensured type-safe reasoning.
+**3. Migration planning**
 
-**3. Architecture Validation**
-
+Prompt used for legacy projects:
 ```bash
-$ gh copilot explain "Should project classification be before or after idea normalization?"
+gh copilot suggest "Given this existing file structure, propose an ideal structure and a step-by-step migration plan."
 ```
+This enabled the migrate mode to produce human-readable re-organization guidance.
 
-Instead of debating internally, Copilot CLI provided reasoned guidance that confirmed our pipeline order was sound.
+### Challenges & How Copilot Helped
+
+**Challenge: Avoiding hardcoded templates**  
+Instead of building a maze of templates, I used Copilot to generate architecture layouts dynamically and then captured the reasoning so each decision is explainable.
+
+**Challenge: Keeping outputs consistent across languages**  
+Copilot suggestions helped shape clean, language-specific prompts and ensured each stack still produced predictable artifacts.
+
+**Challenge: Migration guidance clarity**  
+Copilot produced step-by-step re-organization plans that were far clearer than generic checklist boilerplate.
 
 **4. Capturing Explainability**
 
@@ -212,6 +237,14 @@ Suggested Node + PostgreSQL because:
 2. **Tech Stack** → `gh copilot suggest` + `gh copilot explain` proposes and justifies choices
 3. **Architectural Rationale** → `gh copilot explain` captures reasoning for documentation
 4. **Flexibility** → Same tool works for web apps, APIs, CLIs—each reasoned uniquely
+
+### What Surprised Me
+
+One of the most surprising suggestions was how often Copilot recommended *removing* unnecessary layers to keep MVPs small. That pushed the tool toward simpler, more pragmatic scaffolds rather than over-engineered defaults.
+
+### How It Improved Development Speed
+
+Copilot CLI reduced architecture and documentation drafting from hours to minutes. It enabled rapid iteration on prompts, letting me test multiple scaffolding strategies quickly and pick the most useful outcomes for real-world projects.
 
 ### What I Learned
 
