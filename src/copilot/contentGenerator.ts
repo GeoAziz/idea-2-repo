@@ -16,7 +16,7 @@ type ContentInput = {
   copilotOutput: string;
 };
 
-const FILES = ['README.md', 'TODO.md', 'docs/roadmap.md', 'docs/decisions.md'];
+const BASE_FILES = ['README.md', 'TODO.md', 'docs/roadmap.md', 'docs/decisions.md'];
 
 function basePrompt(input: ContentInput, filePath: string) {
   return `You are generating ${filePath} for a new project scaffold.
@@ -30,9 +30,10 @@ Copilot architecture notes: ${input.copilotOutput}
 Return only the file contents for ${filePath}.`;
 }
 
-export async function generateCopilotContent(input: ContentInput) {
+export async function generateCopilotContent(input: ContentInput, extraFiles: string[] = []) {
   const content: Partial<Record<string, string>> = {};
-  for (const file of FILES) {
+  const files = [...BASE_FILES, ...extraFiles];
+  for (const file of files) {
     const prompt = basePrompt(input, file);
     const output = await suggest(prompt);
     content[file] = output.trim();

@@ -1,0 +1,26 @@
+{
+  "id": "cli-tool",
+  "name": "CLI Tool",
+  "emoji": "🔧",
+  "description": "Production-ready CLI application",
+  "stack": {
+    "language": "TypeScript",
+    "framework": "Commander",
+    "prompts": "Inquirer"
+  },
+  "riskLevel": "low",
+  "idea": "A CLI tool that automates developer workflows with interactive prompts and config management",
+  "features": [
+    "Interactive prompts",
+    "Config file support",
+    "Extensible command structure"
+  ],
+  "customizations": [
+    {
+      "key": "includeTelemetry",
+      "question": "Include usage analytics?",
+      "type": "boolean",
+      "default": false
+    }
+  ]
+}

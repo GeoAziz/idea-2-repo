@@ -1,0 +1,27 @@
+{
+  "id": "data-dashboard",
+  "name": "Data Dashboard",
+  "emoji": "📊",
+  "description": "Analytics dashboard with charts",
+  "stack": {
+    "frontend": "React",
+    "backend": "Express",
+    "database": "PostgreSQL",
+    "charts": "D3.js"
+  },
+  "riskLevel": "low",
+  "idea": "An analytics dashboard that visualizes KPIs and trends for business users",
+  "features": [
+    "Interactive charts",
+    "Data export",
+    "Saved reports"
+  ],
+  "customizations": [
+    {
+      "key": "includeExports",
+      "question": "Include CSV export?",
+      "type": "boolean",
+      "default": true
+    }
+  ]
+}
