@@ -2,25 +2,27 @@ import { normalize } from '../core/ideaNormalizer';
 import { classify } from '../core/projectClassifier';
 import { suggest } from '../copilot/copilotClient';
 import { generateScaffold } from '../scaffold/scaffoldGenerator';
+import { GitManager } from '../git/gitManager';
 import { logger } from '../utils/logger';
 import { slugify } from '../utils/slug';
 import path from 'path';
 
 function parseArgs(args: string[]) {
   const outIndex = args.findIndex((arg) => arg === '--out' || arg === '-o');
+  const teamMode = args.includes('--team');
   let outDir: string | undefined;
   if (outIndex >= 0 && args[outIndex + 1]) {
     outDir = args[outIndex + 1];
   }
   const ideaParts =
     outIndex >= 0
-      ? args.filter((_, idx) => idx !== outIndex && idx !== outIndex + 1)
-      : [...args];
-  return { idea: ideaParts.join(' ').trim(), outDir };
+      ? args.filter((_, idx) => idx !== outIndex && idx !== outIndex + 1 && args[idx] !== '--team')
+      : args.filter((arg) => arg !== '--team');
+  return { idea: ideaParts.join(' ').trim(), outDir, teamMode };
 }
 
 export async function generate(args: string[]) {
-  const { idea, outDir } = parseArgs(args);
+  const { idea, outDir, teamMode } = parseArgs(args);
 
   if (!idea) {
     logger.error('Please provide an idea: idea2repo generate "your awesome app idea"');
@@ -61,11 +63,17 @@ export async function generate(args: string[]) {
       classification,
       copilotInput: copilotPrompt,
       copilotOutput: copilotSuggestion,
-      targetDir
+      targetDir,
+      teamMode
     });
     logger.info(`  ✓ Structure ready (${structure.files.length} files)\n`);
     logger.info(`📁 Output directory: ${structure.outputDir}`);
     logger.info(`🧭 Next steps: cd ${structure.outputDir} && npm install`);
+
+    await GitManager.interactiveSetup({
+      projectPath: structure.outputDir,
+      projectName: name
+    });
 
     logger.info('✅ Generate complete!\n');
     return {

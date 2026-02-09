@@ -1,9 +1,17 @@
 export function buildStructure(parsed: any) {
-  const { idea, classification, decisions } = parsed;
+  const { idea, classification, decisions, teamMode } = parsed;
   const framework = decisions?.framework ?? 'generic';
   const baseFiles = ['README.md', '.gitignore', 'package.json', 'tsconfig.json', 'TODO.md'];
   const testFiles = ['tests/main.test.ts'];
   const docFiles = ['docs/architecture.md', 'docs/roadmap.md', 'docs/decisions.md'];
+  if (teamMode) {
+    docFiles.push(
+      'docs/onboarding.md',
+      'docs/contribution-guide.md',
+      'docs/ARCHITECTURE_DECISION_RECORD.md',
+      'docs/team-setup.md'
+    );
+  }
 
   let srcFiles: string[] = [];
   if (classification.kind === 'cli') {

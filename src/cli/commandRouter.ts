@@ -11,6 +11,14 @@ export async function route(cmd: string, args: string[]) {
     const { explain } = await import('../commands/explain');
     return explain(args);
   }
+  if (cmd === 'chat') {
+    const { chat } = await import('../commands/chat');
+    return chat(args);
+  }
+  if (cmd === 'migrate') {
+    const { migrate } = await import('../commands/migrate');
+    return migrate(args);
+  }
   const { help } = await import('./help');
   return help();
 }
