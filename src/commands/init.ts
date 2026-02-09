@@ -3,6 +3,9 @@ import { normalize } from '../core/ideaNormalizer';
 import { classify } from '../core/projectClassifier';
 import { suggest } from '../copilot/copilotClient';
 import { logger } from '../utils/logger';
+import { generateScaffold } from '../scaffold/scaffoldGenerator';
+import { slugify } from '../utils/slug';
+import path from 'path';
 
 export async function init(_args: string[]) {
   logger.info('\n🚀 idea2repo — Initialize a new project\n');
@@ -59,12 +62,29 @@ export async function init(_args: string[]) {
     const options = responses as any;
     logger.info(`\n📝 Normalizing idea: "${options.idea}"...`);
     const normalized = normalize(options.idea);
+    normalized.appType = options.appType;
     logger.info('✓ Idea normalized');
+
+    const classification = classify(options.idea);
 
     logger.info('\n🤖 Consulting GitHub Copilot CLI for architecture...');
     const architecturePrompt = `Design a ${options.appType} repository structure for: ${options.idea}. Auth required: ${options.auth}. Database: ${options.database}.`;
     const suggestion = await suggest(architecturePrompt);
     logger.info('✓ Architecture suggestion received');
+
+    logger.info('\n🏗️  Building repository scaffold...');
+    const name = slugify(options.name);
+    const outputDir = path.resolve(options.name || name);
+    const structure = await generateScaffold({
+      idea: options.idea,
+      name,
+      normalized,
+      classification,
+      copilotInput: architecturePrompt,
+      copilotOutput: suggestion,
+      targetDir: outputDir
+    });
+    logger.info(`✓ Scaffold generated at ${structure.outputDir}`);
 
     return {
       ok: true,
@@ -72,7 +92,9 @@ export async function init(_args: string[]) {
       config: {
         ...options,
         normalized,
-        architectureSuggestion: suggestion
+        classification,
+        architectureSuggestion: suggestion,
+        outputDir: structure.outputDir
       }
     };
   } catch (error: any) {
