@@ -408,8 +408,10 @@ This is what "AI as a reasoning partner" looks like in practice: **not autocompl
    gh copilot --version
    ```
 
-2. **Run the tool**:
+2. **Clone and test**:
    ```bash
+   git clone https://github.com/GeoAziz/idea-2-repo.git
+   cd idea-2-repo
    npm install
    npm run build
    npm run start -- generate "A real-time chat app for remote teams"
@@ -426,11 +428,16 @@ This is what "AI as a reasoning partner" looks like in practice: **not autocompl
    npm test
    ```
 
-5. **Review the code**:
-   - **Copilot integration**: [src/copilot/copilotClient.ts](https://github.com/devmahnx/idea-2-repo/blob/main/src/copilot/copilotClient.ts)
-   - **How it's used**: [src/commands/generate.ts](https://github.com/devmahnx/idea-2-repo/blob/main/src/commands/generate.ts)
-   - **Full docs**: [docs/copilot-usage.md](https://github.com/devmahnx/idea-2-repo/blob/main/docs/copilot-usage.md)
+5. **Quick local dev** (no build needed):
+   ```bash
+   npm run dev -- generate "Your idea here"
+   ```
+
+6. **Review the code**:
+   - **Copilot integration**: [src/copilot/copilotClient.ts](https://github.com/GeoAziz/idea-2-repo/blob/main/src/copilot/copilotClient.ts)
+   - **How it's used**: [src/commands/generate.ts](https://github.com/GeoAziz/idea-2-repo/blob/main/src/commands/generate.ts)
+   - **Full docs**: [docs/copilot-usage.md](https://github.com/GeoAziz/idea-2-repo/blob/main/docs/copilot-usage.md)
 
 ---
 
-**Built as a submission to the GitHub Copilot CLI Challenge 2026**
+**Built as a submission to the [GitHub Copilot CLI Challenge 2026](https://dev.to/challenges/github-2026-01-21)**
