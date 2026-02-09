@@ -15,6 +15,7 @@ type TemplateContext = {
   copilotInput: string;
   copilotOutput: string;
   decisions: Record<string, any>;
+  generatedContent?: Partial<Record<string, string>>;
 };
 
 const json = (value: unknown) => JSON.stringify(value, null, 2);
@@ -66,7 +67,9 @@ function scriptsFor(decisions: TemplateContext['decisions']) {
 }
 
 export function contentFor(path: string, context: TemplateContext) {
-  const { name, normalized, classification, copilotInput, copilotOutput, decisions } = context;
+  const { name, normalized, classification, copilotInput, copilotOutput, decisions, generatedContent } = context;
+  const override = generatedContent?.[path];
+  if (override) return override;
 
   switch (path) {
     case 'README.md':

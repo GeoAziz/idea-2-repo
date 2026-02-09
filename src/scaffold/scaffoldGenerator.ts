@@ -4,6 +4,7 @@ import { buildStructure } from './structureBuilder';
 import { contentFor } from './templateRegistry';
 import { write } from './fileWriter';
 import { interpretCopilotOutput } from '../copilot/interpretation';
+import { generateCopilotContent } from '../copilot/contentGenerator';
 
 type ScaffoldInput = {
   targetDir: string;
@@ -29,6 +30,12 @@ export async function generateScaffold(input: ScaffoldInput) {
   const { targetDir, dryRun, name, idea, normalized, classification, copilotInput, copilotOutput } = input;
 
   const interpretation = interpretCopilotOutput(copilotOutput);
+  const generatedContent = await generateCopilotContent({
+    idea,
+    normalized,
+    classification,
+    copilotOutput
+  });
   const decisions = {
     name,
     idea,
@@ -39,6 +46,7 @@ export async function generateScaffold(input: ScaffoldInput) {
     framework: interpretation.framework,
     database: interpretation.database,
     stackNotes: interpretation.stackNotes,
+    generatedContent,
     createdAt: new Date().toISOString()
   };
 
@@ -58,7 +66,8 @@ export async function generateScaffold(input: ScaffoldInput) {
     classification,
     copilotInput,
     copilotOutput,
-    decisions
+    decisions,
+    generatedContent
   };
 
   const writtenFiles: string[] = [];
