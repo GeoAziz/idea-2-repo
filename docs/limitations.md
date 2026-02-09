@@ -1,3 +1,4 @@
 # Limitations
 
-This implementation uses stubbed Copilot responses for local demos and tests.
+- Copilot CLI responses depend on local `gh copilot` availability.
+- When Copilot CLI is unavailable, the tool falls back to lightweight offline suggestions.

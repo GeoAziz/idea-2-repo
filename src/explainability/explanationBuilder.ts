@@ -1,3 +1,3 @@
 export function build(decisions: any) {
-  return `Decisions: ${JSON.stringify(decisions)}`;
+  return `## Decisions\n\n\`\`\`json\n${JSON.stringify(decisions, null, 2)}\n\`\`\``;
 }

@@ -1,11 +1,23 @@
 import { normalize } from '../core/ideaNormalizer';
 import { classify } from '../core/projectClassifier';
 import { suggest } from '../copilot/copilotClient';
-import { buildStructure } from '../scaffold/structureBuilder';
+import { generateScaffold } from '../scaffold/scaffoldGenerator';
 import { logger } from '../utils/logger';
+import { slugify } from '../utils/slug';
+import path from 'path';
+
+function parseArgs(args: string[]) {
+  const outIndex = args.findIndex((arg) => arg === '--out' || arg === '-o');
+  let outDir: string | undefined;
+  if (outIndex >= 0 && args[outIndex + 1]) {
+    outDir = args[outIndex + 1];
+  }
+  const ideaParts = args.filter((_, idx) => idx !== outIndex && idx !== outIndex + 1);
+  return { idea: ideaParts.join(' ').trim(), outDir };
+}
 
 export async function generate(args: string[]) {
-  const idea = args.join(' ');
+  const { idea, outDir } = parseArgs(args);
 
   if (!idea) {
     logger.error('Please provide an idea: idea2repo generate "your awesome app idea"');
@@ -37,14 +49,20 @@ export async function generate(args: string[]) {
 
     // Build the repository structure
     logger.info('• Building repository structure...');
-    const structure = buildStructure({
+    const name = slugify(normalized.problem);
+    const targetDir = path.resolve(outDir ?? name);
+    const structure = await generateScaffold({
       idea,
+      name,
       normalized,
       classification,
       copilotInput: copilotPrompt,
-      copilotOutput: copilotSuggestion
+      copilotOutput: copilotSuggestion,
+      targetDir
     });
     logger.info(`  ✓ Structure ready (${structure.files.length} files)\n`);
+    logger.info(`📁 Output directory: ${structure.outputDir}`);
+    logger.info(`🧭 Next steps: cd ${structure.outputDir} && npm install`);
 
     logger.info('✅ Generate complete!\n');
     return {

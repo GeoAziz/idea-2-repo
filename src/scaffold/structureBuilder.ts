@@ -1,8 +1,8 @@
 export function buildStructure(parsed: any) {
   const { idea, classification } = parsed;
-  const baseFiles = ['README.md', '.gitignore', 'package.json', 'tsconfig.json'];
+  const baseFiles = ['README.md', '.gitignore', 'package.json', 'tsconfig.json', 'TODO.md'];
   const testFiles = ['tests/main.test.ts'];
-  const docFiles = ['docs/architecture.md', 'docs/roadmap.md'];
+  const docFiles = ['docs/architecture.md', 'docs/roadmap.md', 'docs/decisions.md'];
 
   let srcFiles: string[] = [];
   if (classification.kind === 'cli') {
