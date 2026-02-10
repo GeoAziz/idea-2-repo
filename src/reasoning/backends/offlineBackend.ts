@@ -63,8 +63,9 @@ function fallbackSuggest(prompt: string): string {
 - .env.example: Environment variables template`;
   }
   
-  // Default suggestion
-  return `Suggested project structure:
+  // Default suggestion for structure prompts
+  if (lower.includes('structure') || lower.includes('folder') || lower.includes('scaffold')) {
+    return `Suggested structure:
 - src/: Source code
 - tests/: Test suites
 - docs/: Documentation
@@ -72,6 +73,13 @@ function fallbackSuggest(prompt: string): string {
 - README.md: Project readme
 - package.json: Dependencies (Node)
 - tsconfig.json: TypeScript config`;
+  }
+
+  return `Offline suggestion:
+Consider starting with a clear README, a src/ directory for implementation,
+and a tests/ folder for automated checks. Add docs/ for longer-form
+documentation and a config file (package.json, pyproject.toml, or similar)
+appropriate for your stack.`;
 }
 
 function fallbackExplain(prompt: string): string {
