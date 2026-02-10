@@ -1,0 +1,5 @@
+{
+  "suggest:f650ee0c26168db0bb0ceda3f58ee9a4d30c0c39": "Suggested project structure:\n- src/: Source code\n- tests/: Test suites\n- docs/: Documentation\n- .gitignore: Git ignore file\n- README.md: Project readme\n- package.json: Dependencies (Node)\n- tsconfig.json: TypeScript config",
+  "suggest:637828c03aae38af639cc721200f2584864e8797": "Suggested project structure:\n- src/: Source code\n- tests/: Test suites\n- docs/: Documentation\n- .gitignore: Git ignore file\n- README.md: Project readme\n- package.json: Dependencies (Node)\n- tsconfig.json: TypeScript config",
+  "explain:1a59dbeadbe7090d0231e8c407f0f9f2843f1c1e": "Explanation (offline mode):\nThe suggested architecture prioritizes:\n• Clarity: Simple, obvious module boundaries\n• Testability: Each module has one responsibility\n• Maintainability: Clear structure for team collaboration\n• Scalability: Easy to extend without major refactors\n• Explainability: Design decisions are traceable"
+}

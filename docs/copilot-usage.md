@@ -17,22 +17,31 @@ Copilot is treated as a **pluggable reasoning backend**, not a hard-coded depend
 
 #### Copilot CLI Backend (`src/reasoning/backends/copilotCliBackend.ts`)
 
-Uses the standalone Copilot CLI command with structured prompts:
+Uses the standalone Copilot CLI command with structured prompts and hardened reliability:
 
 ```typescript
 // Uses standalone 'copilot' command (not deprecated 'gh copilot' extension)
-const cmd = `copilot -p "${escapePrompt(prompt)}" --allow-all`;
-const result = execSync(cmd, { 
-  encoding: 'utf8', 
-  timeout: 5000  // Fast timeout - fail over to offline if slow
-});
+// Implements async execution with retries, configurable timeout, and circuit-breaker
+const cmd = getCopilotCommand();  // Default: 'copilot'
+const timeout = getCopilotTimeout();  // Env: COPILOT_CLI_TIMEOUT_MS (default: 15000ms)
+const maxRetries = getCopilotRetries();  // Env: COPILOT_CLI_RETRIES (default: 2)
+
+// Async execution with exponential backoff
+const result = await retryWithBackoff(
+  () => execFileAsync(cmd, ['-p', escapePrompt(prompt), '--allow-all'], { timeout }),
+  { maxAttempts: maxRetries + 1 }
+);
 ```
 
 **Key improvements:**
-- Uses standalone `copilot` CLI (not `gh copilot` extension)
-- Uses `-p` flag for structured prompt input
-- Includes `--allow-all` for non-interactive mode
-- 5-second timeout for responsive fallback to offline backend
+- Uses standalone `copilot` CLI (not `gh copilot` extension, which is deprecated)
+- **Async execution** with `child_process.execFile` (non-blocking, cancellable)
+- **Configurable timeout**: respects `COPILOT_CLI_TIMEOUT_MS` environment variable (default: 15s)
+- **Automatic retries** with exponential backoff: `COPILOT_CLI_RETRIES` (default: 2 retries)
+- **CLI detection**: Checks if `copilot` is available before attempting calls
+- **Circuit breaker**: Automatically falls back to offline after 3 consecutive failures
+- **Better error messages**: Distinguishes timeout, missing executable, and other failures
+- **Verbose logging**: Set `VERBOSE_REASONING=1` for debugging
 
 #### Offline Backend (`src/reasoning/backends/offlineBackend.ts`)
 
@@ -150,7 +159,28 @@ Every generated repo includes:
 
 Users can ask "why PostgreSQL?" and get a real answer, not a guess.
 
-### 3. Context Preservation
+### 3. Performance & Caching
+
+The reasoning system caches results locally to avoid repeated Copilot CLI calls:
+
+```typescript
+// Prompts are hashed and cached in .idea2repo/reasoning-cache.json
+const cacheKey = `suggest:${sha1(prompt)}`;
+if (cache.has(cacheKey)) {
+  return cache.get(cacheKey);  // Fast return from cache
+}
+
+// If not cached, call Copilot (with retries and timeout)
+const result = await suggest(prompt);
+cache.set(cacheKey, result);   // Store for future use
+```
+
+**Benefits:**
+- First generation may take 15-20s (Copilot CLI calls)
+- Subsequent generations with similar ideas: instant (from cache)
+- Cache persists across CLI invocations in `.idea2repo/reasoning-cache.json`
+
+### 4. Context Preservation
 
 The reasoning session captures:
 ```typescript

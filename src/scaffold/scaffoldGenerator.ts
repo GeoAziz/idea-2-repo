@@ -8,6 +8,7 @@ import { generateCopilotContent } from '../copilot/contentGenerator';
 import { RiskAssessor, RiskAssessment } from '../core/riskAssessment';
 import { logger } from '../utils/logger';
 import { suggest } from '../copilot/copilotClient';
+import { generateSchema } from '../db/schemaGenerator';
 
 type ScaffoldInput = {
   targetDir: string;
@@ -39,6 +40,10 @@ export async function generateScaffold(input: ScaffoldInput) {
   const dependencyPlan = await generateDependencyPlan(idea, classification.kind, language ?? 'node');
   const mermaidDiagram = await generateArchitectureDiagram(idea, classification.kind, interpretation.framework ?? '');
   const riskAssessment = await RiskAssessor.assessRisk(idea, copilotOutput);
+  
+  // Generate database schema artifacts if a database is specified
+  const dbSchemaArtifacts = await generateSchema(interpretation.database, language ?? 'node');
+  
   const generatedContent = await generateCopilotContent(
     {
       idea,
@@ -66,6 +71,7 @@ export async function generateScaffold(input: ScaffoldInput) {
     database: interpretation.database,
     stackNotes: interpretation.stackNotes,
     generatedContent,
+    dbSchemaArtifacts,
     teamMode: Boolean(teamMode),
     language: language ?? 'node',
     dependencyPlan,
