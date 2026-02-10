@@ -1,16 +1,21 @@
 
-> idea2repo@0.1.0 dev
-> ts-node bin/idea2repo.ts generate -- AI habit tracker
+> idea2repo@0.1.0 test
+> jest --coverage
 
-  _     _            ____                       
- (_) __| | ___  __ _|___ \ _ __ ___ _ __   ___  
- | |/ _` |/ _ \/ _` | __) | '__/ _ \ '_ \ / _ \ 
- | | (_| |  __/ (_| |/ __/| | |  __/ |_) | (_) |
- |_|\__,_|\___|\__,_|_____|_|  \___| .__/ \___/ 
-                                   |_|          
-Transform ideas into repositories with AI 🚀
-
-Fatal: ⨯ Unable to compile TypeScript:
-src/reasoning/backends/copilotCliBackend.ts(25,14): error TS2339: Property 'debug' does not exist on type '{ info(...args: any[]): void; error(...args: any[]): void; warn(...args: any[]): void; success(...args: any[]): void; }'.
-src/reasoning/backends/copilotCliBackend.ts(39,14): error TS2339: Property 'debug' does not exist on type '{ info(...args: any[]): void; error(...args: any[]): void; warn(...args: any[]): void; success(...args: any[]): void; }'.
-
+------------------------|---------|----------|---------|---------|-------------------
+File                    | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+------------------------|---------|----------|---------|---------|-------------------
+All files               |   77.22 |    63.88 |     100 |   87.35 |                   
+ core                   |   67.64 |     7.14 |     100 |     100 |                   
+  decisionModel.ts      |     100 |        0 |     100 |     100 | 3                 
+  projectClassifier.ts  |   64.51 |     7.69 |     100 |     100 | 4-25              
+ explainability         |     100 |    95.45 |     100 |     100 |                   
+  explanationBuilder.ts |     100 |    95.45 |     100 |     100 | 20                
+ reasoning              |   94.44 |        0 |     100 |     100 |                   
+  index.ts              |   94.44 |        0 |     100 |     100 | 8                 
+ reasoning/backends     |   70.27 |    68.57 |     100 |   70.27 |                   
+  copilotCliBackend.ts  |   66.66 |       25 |     100 |   66.66 | 35-38,54-57       
+  offlineBackend.ts     |   73.68 |    81.48 |     100 |   73.68 | 8,23,39,53,89     
+ utils                  |     100 |      100 |     100 |     100 |                   
+  logger.ts             |     100 |      100 |     100 |     100 |                   
+------------------------|---------|----------|---------|---------|-------------------
