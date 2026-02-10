@@ -53,13 +53,9 @@ async function withFallback<T>(fn: (backend: ReasoningBackend) => Promise<T>, pr
   try {
     return await fn(backend);
   } catch (error: any) {
-<<<<<<< HEAD
-    logger.warn(`${backend.name} backend failed, using offline reasoning.`);
-=======
     if (process.env.VERBOSE_REASONING) {
       logger.warn(`${backend.name} backend failed, using offline reasoning.`);
     }
->>>>>>> 61a24a0 (feat: add CI workflows for Node.js, Python, Go, and Rust; implement schema generator and retry utilities)
     return fn(offlineBackend);
   }
 }
