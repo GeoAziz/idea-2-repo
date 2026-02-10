@@ -1,8 +1,18 @@
 export async function route(cmd: string, args: string[]) {
+  // Recognized commands
+  const commands = ['init', 'generate', 'explain', 'chat', 'migrate', 'examples', 'use', 'config', 'help'];
+
+  // If cmd is not a recognized command and doesn't start with '-', treat it as generate with that idea
+  if (!commands.includes(cmd) && !cmd.startsWith('-')) {
+    // cmd is the idea, prepend it back to args
+    return route('generate', [cmd, ...args]);
+  }
+
   if (cmd !== 'help') {
     const { showBanner } = await import('../ui/banner');
     showBanner();
   }
+
   if (cmd === 'init') {
     const { init } = await import('../commands/init');
     return init(args);

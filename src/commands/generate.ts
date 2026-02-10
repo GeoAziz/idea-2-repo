@@ -14,29 +14,26 @@ import path from 'path';
 function parseArgs(args: string[]) {
   const outIndex = args.findIndex((arg) => arg === '--out' || arg === '-o');
   const teamMode = args.includes('--team');
+  const dryRun = args.includes('--dry-run');
   const langIndex = args.findIndex((arg) => arg === '--lang' || arg === '-l');
   const language = langIndex >= 0 && args[langIndex + 1] ? args[langIndex + 1] : undefined;
   let outDir: string | undefined;
   if (outIndex >= 0 && args[outIndex + 1]) {
     outDir = args[outIndex + 1];
   }
-  const ideaParts =
-    outIndex >= 0
-      ? args.filter(
-          (_, idx) =>
-            idx !== outIndex &&
-            idx !== outIndex + 1 &&
-            idx !== langIndex &&
-            idx !== langIndex + 1 &&
-            args[idx] !== '--team'
-        )
-      : args.filter((arg, idx) => arg !== '--team' && idx !== langIndex && idx !== langIndex + 1);
-  return { idea: ideaParts.join(' ').trim(), outDir, teamMode, language };
+  const ideaParts = args.filter(
+    (arg, idx) =>
+      arg !== '--team' &&
+      arg !== '--dry-run' &&
+      (outIndex < 0 || (idx !== outIndex && idx !== outIndex + 1)) &&
+      (langIndex < 0 || (idx !== langIndex && idx !== langIndex + 1))
+  );
+  return { idea: ideaParts.join(' ').trim(), outDir, teamMode, language, dryRun };
 }
 
 export async function generate(args: string[]) {
   const config = ConfigManager.load();
-  const { idea, outDir, teamMode, language } = parseArgs(args);
+  const { idea, outDir, teamMode, language, dryRun } = parseArgs(args);
   const resolvedTeamMode = teamMode || config.defaults.teamMode;
   const resolvedLanguage = language ?? config.defaults.language;
 
@@ -81,6 +78,7 @@ export async function generate(args: string[]) {
       copilotInput: copilotPrompt,
       copilotOutput: copilotSuggestion,
       targetDir,
+      dryRun,
       teamMode: resolvedTeamMode,
       language: resolvedLanguage
     });
@@ -90,11 +88,13 @@ export async function generate(args: string[]) {
     }));
     logger.info(colors.info(`Next steps:\n  cd ${structure.outputDir}\n  npm install\n  npm run dev`));
 
-    await GitManager.interactiveSetup({
-      projectPath: structure.outputDir,
-      projectName: name,
-      preferences: config.preferences
-    });
+    if (!dryRun) {
+      await GitManager.interactiveSetup({
+        projectPath: structure.outputDir,
+        projectName: name,
+        preferences: config.preferences
+      });
+    }
 
     logger.info(colors.success('✅ Generate complete!\n'));
     return {

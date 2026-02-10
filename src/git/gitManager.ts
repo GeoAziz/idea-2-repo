@@ -25,6 +25,10 @@ export class GitManager {
 
   constructor(projectPath: string) {
     this.projectPath = projectPath;
+    // Ensure the directory exists before initializing simple-git
+    if (!fs.existsSync(projectPath)) {
+      fs.mkdirSync(projectPath, { recursive: true });
+    }
     this.git = simpleGit(projectPath);
   }
 
