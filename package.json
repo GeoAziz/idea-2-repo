@@ -13,6 +13,7 @@
     "start": "node dist/bin/idea2repo.js",
     "dev": "ts-node bin/idea2repo.ts",
     "test": "jest --coverage",
+    "test:e2e": "jest tests/e2e --coverage",
     "lint": "eslint . --ext .ts",
     "prepare": "npm run build"
   },

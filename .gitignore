@@ -3,3 +3,4 @@ dist/
 .env
 coverage/
 ai-powered-expense-tracker-for-freelancers
+ci.yml

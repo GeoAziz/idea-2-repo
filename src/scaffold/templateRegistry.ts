@@ -387,7 +387,331 @@ Use ${decisions.framework ?? 'a framework to be selected'} with ${decisions.data
     case 'src/components/Header.tsx':
       return `export function Header() {\n  return <header>Header</header>;\n}\n`;
 
+    case '.github/workflows/node.yml':
+      return `name: Node.js CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: \${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run build
+      - run: npm test`;
+
+    case '.github/workflows/python.yml':
+      return `name: Python CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: \${{ matrix.python-version }}
+      - run: pip install -r requirements.txt
+      - run: python -m pytest`;
+
+    case '.github/workflows/go.yml':
+      return `name: Go CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.21', '1.22']
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: \${{ matrix.go-version }}
+      - run: go build ./...
+      - run: go test ./...`;
+
+    case '.github/workflows/rust.yml':
+      return `name: Rust CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo build --verbose
+      - run: cargo test --verbose`;
+
+    case 'tests/test_main.py':
+      return `import pytest
+
+def test_main():
+    assert True
+
+def test_sample():
+    """Sample test to verify pytest setup."""
+    result = 1 + 1
+    assert result == 2`;
+
+    case 'tests/main_test.go':
+      return `package tests
+
+import "testing"
+
+func TestMain(t *testing.T) {
+  if 1 != 1 {
+    t.Fail()
+  }
+}
+
+func TestSample(t *testing.T) {
+  result := 1 + 1
+  if result != 2 {
+    t.Fatalf("Expected 2, got %d", result)
+  }
+}`;
+
+    case 'tests/sample.test.ts':
+    case 'tests/main.test.ts':
+      return `describe('Sample Tests', () => {
+  test('project scaffold', () => {
+    expect('idea2repo').toBeDefined();
+  });
+
+  test('basic math', () => {
+    const result = 1 + 1;
+    expect(result).toBe(2);
+  });
+});`;
+
+    case '.env.example':
+      return `# Environment Configuration
+# Copy this file to .env and fill in your values
+
+# Development
+NODE_ENV=development
+DEBUG=*
+
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/${name.toLowerCase().replace(/[\\s-]/g, '_')}
+
+# API Keys (if needed)
+# API_KEY=your_key_here
+
+# Feature Flags
+# FEATURE_X_ENABLED=true`;
+
+    case 'Makefile':
+      return `# Makefile for ${name}
+
+.PHONY: help install dev build test clean
+
+help:
+\t@echo "Available commands:"
+\t@echo "  make install   - Install dependencies"
+\t@echo "  make dev       - Start development server"
+\t@echo "  make build     - Build for production"
+\t@echo "  make test      - Run test suite"
+\t@echo "  make clean     - Clean build artifacts"
+
+install:
+\tnpm install
+
+dev:
+\tnpm run dev
+
+build:
+\tnpm run build
+
+test:
+\tnpm test
+
+clean:
+\trm -rf dist node_modules`;
+
+    case 'src/env.ts':
+      if (decisions.language !== 'node') return null;
+      return `// Environment variables with runtime validation
+const requiredEnv = ['NODE_ENV'];
+const optionalEnv = ['DATABASE_URL', 'API_KEY'];
+
+function validateEnv() {
+  const missing = requiredEnv.filter(key => !process.env[key]);
+  if (missing.length > 0) {
+    throw new Error(\`Missing required env vars: \${missing.join(', ')}\`);
+  }
+}
+
+export const env = {
+  NODE_ENV: process.env.NODE_ENV as string,
+  DATABASE_URL: process.env.DATABASE_URL,
+  API_KEY: process.env.API_KEY,
+  isDev: process.env.NODE_ENV === 'development',
+  isProd: process.env.NODE_ENV === 'production',
+  validate: validateEnv
+};`;
+
+    case 'src/config/index.ts':
+      if (decisions.language !== 'node') return null;
+      return `// Configuration loader
+import { env } from '../env';
+
+export const config = {
+  app: {
+    name: '${name}',
+    version: '0.1.0',
+    environment: env.NODE_ENV
+  },
+  database: {
+    url: env.DATABASE_URL
+  }
+};
+
+// Validate on load
+env.validate();`;
+
+    case 'pytest.ini':
+      if (decisions.language !== 'python') return null;
+      return `[pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+addopts = -v --tb=short`;
+
+    case 'src/__init__.py':
+      if (decisions.language !== 'python') return null;
+      return `"""${name} - ${normalized.problem}"""
+
+__version__ = "0.1.0"`;
+
+    case 'Dockerfile':
+      if (decisions.language === 'node') {
+        return `FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["node", "dist/index.js"]`;
+      } else if (decisions.language === 'python') {
+        return `FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0"]`;
+      } else if (decisions.language === 'go') {
+        return `FROM golang:1.22-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -o app ./cmd/app
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+COPY --from=builder /app/app .
+EXPOSE 8080
+CMD ["./app"]`;
+      }
+      return `# Add Dockerfile template`;
+
+    case 'docker-compose.yml':
+      const dbService = !decisions.database ? ''
+        : decisions.database === 'postgresql'
+          ? `\n  database:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"`
+          : decisions.database === 'mysql'
+                ? `\n  database:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"`
+                : `\n  database:
+    image: mongo:6
+    ports:
+      - "27017:27017"`;
+
+      return `version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://user:password@localhost:5432/${name.toLowerCase().replace(/\s+/g, '_')}${dbService}`;
+
+    case '.gitkeep':
+      return '';
+
     default:
-      return `// TODO: Implement ${path}`;
+      // Check if this is a DB schema artifact
+      if (decisions.dbSchemaArtifacts && path in decisions.dbSchemaArtifacts) {
+        return decisions.dbSchemaArtifacts[path as keyof typeof decisions.dbSchemaArtifacts];
+      }
+
+      // Fallback: generate smart defaults based on file type
+      if (path.includes('/__pycache__/') || path.includes('/.git/')) return '';
+      if (path.endsWith('.ts') || path.endsWith('.js')) {
+        return `// ${path}\n// TODO: Implement this module\n\nexport {};`;
+      }
+      if (path.endsWith('.py')) {
+        return `# ${path}\n# TODO: Implement this module\n`;
+      }
+      if (path.endsWith('.go')) {
+        return `package main\n\n// TODO: Implement this module\n`;
+      }
+      if (path.endsWith('.rs')) {
+        return `// ${path}\n// TODO: Implement this module\n`;
+      }
+      if (path.endsWith('.md')) {
+        return `# ${path}\n\nTODO: Add documentation for this section.`;
+      }
+      return `# ${path} - TODO: Implement`;
   }
 }
