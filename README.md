@@ -200,14 +200,11 @@ npm run dev -- generate "Your idea here"
 
 ## Test Coverage
 
-```
-Overall: 83% statement coverage
-- copilot integration: 85%
-- core logic: 100%
-- explainability: 100%
-- utils: 40%
+Coverage and test counts evolve as the project grows. Run the latest local numbers with:
 
-All 8 tests passing ✅
+```bash
+npm test
+npm run test:e2e
 ```
 
 ## Examples
