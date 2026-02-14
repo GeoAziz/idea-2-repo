@@ -26,7 +26,7 @@ npm run lint
 ```
 
 **Environment variables for testing:**
-- `REASONING_BACKEND=offline` - Force offline backend (default in CI)
+- `REASONING_BACKEND=offline` - Force offline backend (recommended for deterministic tests)
 - `VERBOSE_REASONING=1` - Debug reasoning system logs
 - `COPILOT_CLI_TIMEOUT_MS=15000` - Copilot CLI timeout (default: 15s)
 - `COPILOT_CLI_RETRIES=2` - Retry attempts (default: 2)
@@ -39,6 +39,7 @@ The core architectural pattern is a **pluggable reasoning backend** with automat
 
 1. **Copilot CLI Backend** (`src/reasoning/backends/copilotCliBackend.ts`)
    - Uses standalone `copilot` command (not deprecated `gh copilot`)
+   - Command is configurable with `COPILOT_CLI_CMD` to support environment-specific setups
    - Async execution with configurable timeout and retries
    - Circuit breaker pattern: trips after 3 failures, auto-resets after 60s
    - Caches responses in `.idea2repo/reasoning-cache.json` (SHA-1 hashed prompts)
@@ -68,7 +69,7 @@ User Idea
 ### Key Components
 
 - **CLI Layer** (`src/cli/`): Command routing and help
-- **Commands** (`src/commands/`): `generate`, `init`, `explain`, `migrate`, `chat`, `use`, `examples`
+- **Commands** (`src/commands/`): `generate`, `init`, `explain`, `migrate`, `chat`, `use`, `examples`, `config`
 - **Core** (`src/core/`): Idea normalization, project classification, risk assessment, decision model
 - **Reasoning** (`src/reasoning/`): Backend abstraction, caching, circuit breaker
 - **Scaffold** (`src/scaffold/`): Structure building, template registry, file writing
@@ -134,7 +135,7 @@ The project uses TypeScript strict mode with:
 ### Backend Selection
 
 ```typescript
-// In src/reasoning/index.ts
+// In src/reasoning/index.ts (simplified)
 function selectedBackend(): ReasoningBackend {
   const choice = process.env.REASONING_BACKEND?.toLowerCase();
   if (choice === 'offline') return offlineBackend;
@@ -147,12 +148,13 @@ Always check `REASONING_BACKEND` env var before assuming Copilot CLI is used.
 ### Error Handling with Fallback
 
 ```typescript
-async function withFallback<T>(fn, prompt) {
+// In src/reasoning/index.ts (simplified)
+async function withFallback<T>(fn: (backend: ReasoningBackend) => Promise<T>, prompt: string) {
   const backend = selectedBackend();
   try {
     return await fn(backend);
   } catch (error) {
-    logger.warn(`${backend.name} failed, using offline reasoning.`);
+    // Real implementation logs only when VERBOSE_REASONING is enabled
     return fn(offlineBackend);
   }
 }
