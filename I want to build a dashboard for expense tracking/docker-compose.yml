@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://user:password@localhost:5432/a-cli-tool-that-automates-developer-workflows-with-interacti
+  database:
+    image: mongo:6
+    ports:
+      - "27017:27017"

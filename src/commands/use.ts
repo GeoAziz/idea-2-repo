@@ -36,31 +36,84 @@ export async function useExample(args: string[]) {
     return { ok: false, error: 'Example not found' };
   }
 
-  const baseQuestions = [
+  logger.info(colors.info(`\n📋 Template: ${example.name}\n${example.description}\n`));
+
+  const decisions = await inquirer.prompt([
     {
-      type: 'input',
-      name: 'projectName',
-      message: 'Project name?',
-      default: example.id
+      type: 'list',
+      name: 'mode',
+      message: 'What would you like to do?',
+      choices: [
+        { name: `Use "${example.name}" template`, value: 'useTemplate' },
+        { name: 'Customize the template idea', value: 'customize' },
+        { name: 'Use your own idea instead', value: 'ownIdea' }
+      ]
     }
-  ];
+  ]);
 
-  const customQuestions =
-    example.customizations?.map((custom) => ({
-      type: custom.type === 'choice' ? 'list' : custom.type === 'boolean' ? 'confirm' : 'input',
-      name: custom.key,
-      message: custom.question,
-      choices: custom.options,
-      default: custom.default
-    })) ?? [];
+  let finalIdea = example.idea;
+  let projectName = example.id;
 
-  const answers = await inquirer.prompt([...baseQuestions, ...customQuestions]);
-  const customSummary = Object.entries(answers)
-    .filter(([key]) => key !== 'projectName')
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(', ');
+  if (decisions.mode === 'ownIdea') {
+    // User wants to provide their own idea - use generate command instead
+    const customIdea = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'idea',
+        message: 'Describe your app idea',
+        default: example.idea
+      }
+    ]);
+    finalIdea = customIdea.idea;
+    const nameAnswer = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'projectName',
+        message: 'Project name?',
+        default: 'my-project'
+      }
+    ]);
+    projectName = nameAnswer.projectName;
+  } else if (decisions.mode === 'customize') {
+    // Ask for customizations
+    const customQuestions =
+      example.customizations?.map((custom) => ({
+        type: custom.type === 'choice' ? 'list' : custom.type === 'boolean' ? 'confirm' : 'input',
+        name: custom.key,
+        message: custom.question,
+        choices: custom.options,
+        default: custom.default
+      })) ?? [];
 
-  const idea = `${example.idea}${customSummary ? ` (Customizations: ${customSummary})` : ''}`;
-  const argsForGenerate = [idea, '--out', answers.projectName];
+    const answers = await inquirer.prompt(customQuestions);
+    const customSummary = Object.entries(answers)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(', ');
+
+    finalIdea = `${example.idea} (Customizations: ${customSummary})`;
+
+    const nameAnswer = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'projectName',
+        message: 'Project name?',
+        default: example.id
+      }
+    ]);
+    projectName = nameAnswer.projectName;
+  } else {
+    // useTemplate - just ask for project name
+    const nameAnswer = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'projectName',
+        message: 'Project name?',
+        default: example.id
+      }
+    ]);
+    projectName = nameAnswer.projectName;
+  }
+
+  const argsForGenerate = [finalIdea, '--out', projectName];
   return generate(argsForGenerate);
 }

@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://user:password@localhost:5432/i-want-to-build-a-dashboard-for-expense-tracking
+  database:
+    image: mongo:6
+    ports:
+      - "27017:27017"
