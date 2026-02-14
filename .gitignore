@@ -2,5 +2,5 @@ node_modules/
 dist/
 .env
 coverage/
-ai-powered-expense-tracker-for-freelancers
+ai-powered-expense-tracker-for-freelancers/
 ci.yml
